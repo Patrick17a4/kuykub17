@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍽️ คำนวณแคลอรี่และคาร์โบไฮเดรต</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fdf2e9;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2, h3 { color: #ff6b6b; }
+        input, select, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            background-color: #ff6b6b;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover { background-color: #e63946; }
+        ul { list-style-type: none; padding: 0; }
+        ul li {
+            background: #ffe5d9;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        canvas { max-width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📝 ข้อมูลส่วนตัว</h2>
+        <label>⚖️ น้ำหนัก (กก.)</label><input type="number" id="weight">
+        <label>📏 ส่วนสูง (ซม.)</label><input type="number" id="height">
+        <label>🎂 อายุ</label><input type="number" id="age">
+        <label>🚻 เพศ</label>
+        <select id="gender">
+            <option value="male">👨‍🦰 ชาย</option>
+            <option value="female">👩‍🦰 หญิง</option>
+        </select>
+        <label>🏋️ ระดับการออกกำลังกาย</label>
+        <select id="activity">
+            <option value="1.2">🛌 ไม่ออกกำลังกาย</option>
+            <option value="1.375">🚶 1-3 ครั้ง/สัปดาห์</option>
+            <option value="1.55">🏃 3-5 ครั้ง/สัปดาห์</option>
+            <option value="1.725">💪 6-7 ครั้ง/สัปดาห์</option>
+            <option value="1.9">🏋️ ทุกวัน</option>
+        </select>
+        <button onclick="calculateNeeds()">📊 คำนวณ</button>
+
+        <h3>📢 ค่าที่แนะนำ</h3>
+        <p>🔥 แคลอรี่ที่ต้องการ: <b><span id="caloriesNeed">-</span></b> kcal</p>
+        <p>🍞 คาร์โบไฮเดรตที่ต้องการ: <b><span id="carbsNeed">-</span></b> กรัม</p>
+
+        <h2>🍛 บันทึกเมนูอาหาร</h2>
+        <label>🥗 มื้ออาหาร</label>
+        <select id="meal">
+            <option value="เช้า">🌅 เช้า</option>
+            <option value="กลางวัน">🌞 กลางวัน</option>
+            <option value="เย็น">🌙 เย็น</option>
+            <option value="อาหารว่าง">🍪 อาหารว่าง</option>
+        </select>
+        <label>🍽️ เมนูอาหาร</label>
+        <select id="food">
+            <option value="ข้าว" data-cal="80" data-carb="15">🍚 ข้าว (1 ทัพพี)</option>
+              <option value="ข้าวเหนียว" data-cal="120" data-carb="31">🍙 ข้าวเหนียว (1 ทัพพี)</option>
+              <option value="ขนุน" data-cal="80" data-carb="20">🥥ขนุน (2 ผล/ชิ้น)</option>
+              <option value="มะขามหวาน" data-cal="90" data-carb="22">🫛มะขามหวาน (2 ผล/ชิ้น)</option>
+              <option value="ส้มโอ" data-cal="60" data-carb="15">🍊ส้มโอ (2 ผล/ชิ้น)</option>
+              <option value="มังคุด" data-cal="70" data-carb="18">🫐มังคุด (4 ผล)</option>
+              <option value="เงาะ" data-cal="80" data-carb="20">🥦เงาะ (4 ผล)</option>
+              <option value="พุทรา" data-cal="75" data-carb="19">🫑พุทรา (4 ผล)</option>
+              <option value="ลองกอง" data-cal="65" data-carb="17">🫒ลองกอง (5-6 ผล)</option>
+              <option value="ลิ้นจี่" data-cal="75" data-carb="18">🍒ลิ้นจี่ (5-6 ผล)</option>
+              <option value="ลำไย" data-cal="70" data-carb="17">🍒ลำไย (5-6 ผล)</option>
+              <option value="แตงโม" data-cal="50" data-carb="12">🍉แตงโม (6-8 ชิ้น)</option>
+              <option value="สับปะรด" data-cal="60" data-carb="15">🍍สับปะรด (6-8 ชิ้น)</option>
+              <option value="มะละกอสุก" data-cal="55" data-carb="13">🍐มะละกอสุก (6-8 ชิ้น)</option>
+              <option value="กล้วยหอม" data-cal="105" data-carb="27">🍌กล้วยหอม (1/2 ผล)</option>
+              <option value="ฝรั่ง" data-cal="50" data-carb="12">🍐ฝรั่ง (ผลกลาง) (1/2 ผล)</option>
+              <option value="แก้วมังกร" data-cal="60" data-carb="13">🍈แก้วมังกร (1/2 ผล)</option>
+             <option value="มะม่วงสุก/ดิบ" data-cal="65" data-carb="15">🥭มะม่วงสุก/ดิบ (1/2 ผล)</option>
+             <option value="กล้วยน้ำว้า" data-cal="90" data-carb="23">🍌กล้วยน้ำว้า (1 ผล)</option>
+             <option value="แอปเปิ้ล" data-cal="55" data-carb="14">🍎แอปเปิ้ล (ผลเล็ก) (1 ผล)</option>
+            <option value="ส้ม" data-cal="60" data-carb="15">🍊ส้ม (ผลใหญ่) (1 ผล)</option>
+           <option value="ทุเรียน" data-cal="150" data-carb="28">🍥ทุเรียน (เม็ดเล็ก) (1 ผล)</option>
+            <option value="ขนมปัง" data-cal="80" data-carb="15">🍞 ขนมปัง (1 แผ่น)</option>
+            <option value="น้ำตาล" data-cal="60" data-carb="15">🍬 น้ำตาล (3 ช้อนชา)</option>
+            <option value="นมสดจืด" data-cal="130" data-carb="12">🥛 นมสดจืด (1 แก้ว, 250 ml)</option>
+            <option value="นมสดรสหวาน" data-cal="160" data-carb="20">🥛 นมสดรสหวาน (1 แก้ว, 250 ml)</option>
+            <option value="นมพร่องมันเนย" data-cal="100" data-carb="12">🥛 นมพร่องมันเนย (1 แก้ว, 250 ml)</option>
+            <option value="นมถั่วเหลือง" data-cal="150" data-carb="14">🥛 นมถั่วเหลือง (1 แก้ว, 250 ml)</option>
+            <option value="นมอัลมอนด์" data-cal="60" data-carb="1">🥛 นมอัลมอนด์ (1 แก้ว, 250 ml)</option>
+            <option value="แตงกวา" data-cal="16" data-carb="3">🥒 แตงกวา (1 ถ้วย, 100 g)</option>
+            <option value="ผักกาดหอม" data-cal="15" data-carb="2">🥬 ผักกาดหอม (1 ถ้วย, 100 g)</option>
+            <option value="มะเขือเทศ" data-cal="18" data-carb="4">🍅 มะเขือเทศ (1 ลูกกลาง, 100 g)</option>
+            <option value="แครอท" data-cal="41" data-carb="10">🥕 แครอท (1 ถ้วย, 100 g)</option>
+            <option value="กะหล่ำปลี" data-cal="25" data-carb="6">🥬 กะหล่ำปลี (1 ถ้วย, 100 g)</option>
+           <option value="ผักบุ้งต้ม" data-cal="20" data-carb="3">🥬 ผักบุ้งต้ม (1 ถ้วย, 100 g)</option>
+           <option value="บล็อกโคลีต้ม" data-cal="35" data-carb="7">🥦 บล็อกโคลีต้ม (1 ถ้วย, 100 g)</option>
+           <option value="ฟักทองต้ม" data-cal="26" data-carb="7">🎃 ฟักทองต้ม (1 ถ้วย, 100 g)</option>
+           <option value="ถั่วฝักยาวต้ม" data-cal="47" data-carb="10">🌿 ถั่วฝักยาวต้ม (1 ถ้วย, 100 g)</option>
+         <option value="ผักกาดขาวต้ม" data-cal="12" data-carb="2">🥬 ผักกาดขาวต้ม (1 ถ้วย, 100 g)</option> <!-- นม -->
+         <option value="นมสดจืด" data-cal="130" data-carb="12">🥛 นมสดจืด (1 แก้ว, 250 ml)</option>
+         <option value="แตงกวา" data-cal="16" data-carb="3">🥒 แตงกวา (1 ถ้วย, 100 g)</option>
+         <option value="ผักกาดหอม" data-cal="15" data-carb="2">🥬 ผักกาดหอม (1 ถ้วย, 100 g)</option>
+         <option value="มะเขือเทศ" data-cal="18" data-carb="4">🍅 มะเขือเทศ (1 ลูกกลาง, 100 g)</option>
+         <option value="แครอท" data-cal="41" data-carb="10">🥕 แครอท (1 ถ้วย, 100 g)</option>
+        <option value="กะหล่ำปลี" data-cal="25" data-carb="6">🥬 กะหล่ำปลี (1 ถ้วย, 100 g)</option>
+        <option value="ผักบุ้งต้ม" data-cal="20" data-carb="3">🥬 ผักบุ้งต้ม (1 ถ้วย, 100 g)</option>
+         <option value="บล็อกโคลีต้ม" data-cal="35" data-carb="7">🥦 บล็อกโคลีต้ม (1 ถ้วย, 100 g)</option>
+         <option value="ฟักทองต้ม" data-cal="26" data-carb="7">🎃 ฟักทองต้ม (1 ถ้วย, 100 g)</option>
+         <option value="ถั่วฝักยาวต้ม" data-cal="47" data-carb="10">🌿 ถั่วฝักยาวต้ม (1 ถ้วย, 100 g)</option>
+         <option value="ผักกาดขาวต้ม" data-cal="12" data-carb="2">🥬 ผักกาดขาวต้ม (1 ถ้วย, 100 g)</option>
+
+        </select>
+        <button onclick="addFood()">➕ เพิ่มอาหาร</button>
+
+        <h3>📋 อาหารที่ทาน</h3>
+        <ul id="foodList"></ul>
+        
+        <h3>📊 สรุป</h3>
+        <p>🔥 แคลอรี่ที่ทานไป: <b><span id="caloriesTaken">0</span></b> kcal</p>
+        <p>🍞 คาร์โบไฮเดรตที่ทานไป: <b><span id="carbsTaken">0</span></b> กรัม</p>
+
+        <canvas id="calChart"></canvas>
+        <canvas id="carbChart"></canvas>
+
+        <button onclick="showSummary()">📌 สรุปการกิน</button>
+    </div>
+
+    <script>
+        let caloriesNeed = 0, carbsNeed = 0, caloriesTaken = 0, carbsTaken = 0;
+        let calChart, carbChart;
+
+        function calculateNeeds() {
+            let weight = parseFloat(document.getElementById("weight").value);
+            let height = parseFloat(document.getElementById("height").value);
+            let age = parseInt(document.getElementById("age").value);
+            let gender = document.getElementById("gender").value;
+            let activity = parseFloat(document.getElementById("activity").value);
+            
+            caloriesNeed = (gender === "male" ? (10 * weight + 6.25 * height - 5 * age + 5) : (10 * weight + 6.25 * height - 5 * age - 161)) * activity;
+            carbsNeed = (caloriesNeed * 0.5) / 4;
+
+            document.getElementById("caloriesNeed").textContent = Math.round(caloriesNeed);
+            document.getElementById("carbsNeed").textContent = Math.round(carbsNeed);
+            updateCharts();
+        }
+
+        function addFood() {
+            let food = document.getElementById("food");
+            let cal = parseInt(food.selectedOptions[0].getAttribute("data-cal"));
+            let carb = parseInt(food.selectedOptions[0].getAttribute("data-carb"));
+
+            caloriesTaken += cal;
+            carbsTaken += carb;
+
+            document.getElementById("caloriesTaken").textContent = caloriesTaken;
+            document.getElementById("carbsTaken").textContent = carbsTaken;
+            updateCharts();
+        }
+
+        function updateCharts() {
+    let ctx1 = document.getElementById('calChart').getContext('2d');
+    let ctx2 = document.getElementById('carbChart').getContext('2d');
+    
+    if (calChart) calChart.destroy();
+    if (carbChart) carbChart.destroy();
+
+    calChart = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ["บริโภคแล้ว", "เหลือ"],
+            datasets: [{
+                data: [caloriesTaken, Math.max(caloriesNeed - caloriesTaken, 0)],
+                backgroundColor: ["#ff6b6b", "#ffdd99"]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: "แคลอรี่ (kcal)",  // แสดงชื่อกราฟแคลอรี่
+                    font: { size: 18 }
+                }
+            }
+        }
+    });
+
+    carbChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ["บริโภคแล้ว", "เหลือ"],
+            datasets: [{
+                data: [carbsTaken, Math.max(carbsNeed - carbsTaken, 0)],
+                backgroundColor: ["#ff6b6b", "#ffdd99"]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: "คาร์โบไฮเดรต (g)",  // แสดงชื่อกราฟคาร์โบไฮเดรต
+                    font: { size: 18 }
+                }
+            }
+        }
+    });
+}
+    </script>
+</body>
+</html>
